@@ -245,7 +245,7 @@
         <span class="pct-label">Battery</span>
       </div>
     </div>
-    <div class="status-badge charging" id="statusBadge">⚡ Charging</div>
+
   </div>
 
   <!-- Power Toggle -->
@@ -259,18 +259,7 @@
     <span class="toggle-label on" id="toggleLabel">System On</span>
   </div>
 
-  <!-- Bottom Info -->
-  <div class="bottom-info" id="bottomInfo">
-    <div class="info-item">
-      <span class="info-val" id="solarVal">3,240 W</span>
-      <span class="info-lbl">Solar Input</span>
-    </div>
-    <div class="info-sep"></div>
-    <div class="info-item">
-      <span class="info-val" id="timeVal">6h 20m</span>
-      <span class="info-lbl">Until Full</span>
-    </div>
-  </div>
+
 </div>
 
 <script>
@@ -287,32 +276,22 @@
     isOn = !isOn;
     const btn = document.getElementById('powerBtn');
     const label = document.getElementById('toggleLabel');
-    const badge = document.getElementById('statusBadge');
-    const solar = document.getElementById('solarVal');
-    const time = document.getElementById('timeVal');
+
     const ring = document.getElementById('ringFill');
 
     if (isOn) {
       btn.className = 'power-btn on';
       label.className = 'toggle-label on';
       label.textContent = 'System On';
-      badge.className = 'status-badge charging';
-      badge.textContent = '⚡ Charging';
       ring.style.stroke = '#FFB800';
       ring.style.filter = 'drop-shadow(0 0 10px rgba(255,184,0,0.6))';
-      solar.textContent = '3,240 W';
-      time.textContent = '6h 20m';
       setRing(75);
     } else {
       btn.className = 'power-btn off';
       label.className = 'toggle-label off';
       label.textContent = 'System Off';
-      badge.className = 'status-badge idle';
-      badge.textContent = '○ Idle';
       ring.style.stroke = 'rgba(255,255,255,0.18)';
       ring.style.filter = 'none';
-      solar.textContent = '0 W';
-      time.textContent = '—';
       setRing(75);
     }
   }
