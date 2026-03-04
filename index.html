@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SolarOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: #0B1E3D;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .phone {
+    width: 360px;
+    height: 780px;
+    background: linear-gradient(160deg, #0f2a50 0%, #0B1E3D 60%, #101c35 100%);
+    border-radius: 48px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), inset 0 0 0 1.5px rgba(255,255,255,0.07);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle background glow */
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,184,0,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Notch */
+  .phone::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 30px;
+    background: #060e1e;
+    border-radius: 0 0 20px 20px;
+  }
+
+  /* ── App title ── */
+  .app-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-top: 20px;
+  }
+
+  /* ── Battery Ring ── */
+  .ring-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+
+  .ring-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .ring-track {
+    fill: none;
+    stroke: rgba(255,255,255,0.06);
+    stroke-width: 12;
+  }
+
+  .ring-fill {
+    fill: none;
+    stroke: #FFB800;
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 565.5; /* 2π × 90 */
+    stroke-dashoffset: 141.4; /* 75% filled */
+    transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1), stroke 0.5s;
+    filter: drop-shadow(0 0 10px rgba(255,184,0,0.6));
+  }
+
+  .ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .pct-number {
+    font-size: 3.2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: -2px;
+    transition: color 0.5s;
+  }
+
+  .pct-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .status-badge {
+    margin-top: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 4px 12px;
+    border-radius: 20px;
+    transition: background 0.5s, color 0.5s;
+  }
+  .status-badge.charging {
+    background: rgba(34,201,122,0.15);
+    color: #5BFFB0;
+    border: 1px solid rgba(34,201,122,0.25);
+  }
+  .status-badge.idle {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.35);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* ── Toggle Button ── */
+  .toggle-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .power-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.4s, background 0.4s;
+    outline: none;
+  }
+
+  .power-btn.on {
+    background: linear-gradient(145deg, #FFB800, #FF8C00);
+    box-shadow: 0 0 0 12px rgba(255,184,0,0.1), 0 0 40px rgba(255,184,0,0.4), 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .power-btn.off {
+    background: rgba(255,255,255,0.07);
+    box-shadow: 0 0 0 12px rgba(255,255,255,0.03), 0 8px 20px rgba(0,0,0,0.4);
+  }
+
+  .power-btn:active { transform: scale(0.93); }
+
+  .power-icon {
+    width: 32px;
+    height: 32px;
+    transition: opacity 0.3s;
+  }
+
+  .power-btn.on .power-icon { opacity: 1; }
+  .power-btn.off .power-icon { opacity: 0.35; }
+
+  .toggle-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.4s;
+  }
+  .toggle-label.on { color: #FFB800; }
+  .toggle-label.off { color: rgba(255,255,255,0.25); }
+
+  /* ── Bottom info ── */
+  .bottom-info {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 16px;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .info-val {
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .info-lbl {
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.25);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .info-sep {
+    width: 1px;
+    background: rgba(255,255,255,0.08);
+    align-self: stretch;
+    margin: 4px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="app-title">SolarOS</div>
+
+  <!-- Battery Ring -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+    <div class="ring-wrap">
+      <svg class="ring-svg" viewBox="0 0 200 200">
+        <circle class="ring-track" cx="100" cy="100" r="90"/>
+        <circle class="ring-fill" id="ringFill" cx="100" cy="100" r="90"/>
+      </svg>
+      <div class="ring-center">
+        <span class="pct-number" id="pctNum">75</span>
+        <span class="pct-label">Battery</span>
+      </div>
+    </div>
+    <div class="status-badge charging" id="statusBadge">⚡ Charging</div>
+  </div>
+
+  <!-- Power Toggle -->
+  <div class="toggle-wrap">
+    <button class="power-btn on" id="powerBtn" onclick="togglePower()">
+      <svg class="power-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+        <path d="M12 2v6"/>
+        <path d="M19.07 4.93a10 10 0 1 1-14.14 0"/>
+      </svg>
+    </button>
+    <span class="toggle-label on" id="toggleLabel">System On</span>
+  </div>
+
+  <!-- Bottom Info -->
+  <div class="bottom-info" id="bottomInfo">
+    <div class="info-item">
+      <span class="info-val" id="solarVal">3,240 W</span>
+      <span class="info-lbl">Solar Input</span>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-item">
+      <span class="info-val" id="timeVal">6h 20m</span>
+      <span class="info-lbl">Until Full</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let isOn = true;
+  const CIRCUMFERENCE = 2 * Math.PI * 90; // 565.5
+
+  function setRing(pct) {
+    const offset = CIRCUMFERENCE * (1 - pct / 100);
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+    document.getElementById('pctNum').textContent = pct;
+  }
+
+  function togglePower() {
+    isOn = !isOn;
+    const btn = document.getElementById('powerBtn');
+    const label = document.getElementById('toggleLabel');
+    const badge = document.getElementById('statusBadge');
+    const solar = document.getElementById('solarVal');
+    const time = document.getElementById('timeVal');
+    const ring = document.getElementById('ringFill');
+
+    if (isOn) {
+      btn.className = 'power-btn on';
+      label.className = 'toggle-label on';
+      label.textContent = 'System On';
+      badge.className = 'status-badge charging';
+      badge.textContent = '⚡ Charging';
+      ring.style.stroke = '#FFB800';
+      ring.style.filter = 'drop-shadow(0 0 10px rgba(255,184,0,0.6))';
+      solar.textContent = '3,240 W';
+      time.textContent = '6h 20m';
+      setRing(75);
+    } else {
+      btn.className = 'power-btn off';
+      label.className = 'toggle-label off';
+      label.textContent = 'System Off';
+      badge.className = 'status-badge idle';
+      badge.textContent = '○ Idle';
+      ring.style.stroke = 'rgba(255,255,255,0.18)';
+      ring.style.filter = 'none';
+      solar.textContent = '0 W';
+      time.textContent = '—';
+      setRing(75);
+    }
+  }
+
+  // Init
+  setRing(75);
+</script>
+</body>
+</html>
